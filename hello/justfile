@@ -1,0 +1,93 @@
+set windows-shell := [ "powershell", "-nologo", "-noprofile", "-c" ]
+
+_default:
+ @just --list
+
+# Clean binary files
+[windows]
+clean:
+  rm *.exe.obj 
+  rm *.exe
+# Clean binary files
+[linux]
+clean:
+  rm *.o -f
+  find . -type f ! -name "*.*" -name "hello*" | xargs -r rm
+
+# List binary files
+[windows]
+ls:
+  ls *.exe | sort Length
+# List binary files
+[linux]
+ls:
+  ls -l | grep -E 'hello_\w+$' | sort --key=5n
+
+# List all binary files (Windows + Linux)
+[windows]
+la:
+  ls hello* | where { -not $_.Name.Contains(".") -or $_.Name.Endswith(".exe") } | sort Length
+# List all binary files (Windows + Linux)
+[linux]
+la:
+  ls -l | grep -E 'hello_\w+(\.exe)?$' | sort --key=5n
+
+# Build all langs
+build:
+  just rust
+  just nim
+  just go
+  just zig
+  just odin
+  just ls
+
+[windows]
+ldd:
+  dumpbin /imports hello_rust.exe
+  dumpbin /imports hello_nim.exe
+  dumpbin /imports hello_go.exe
+  dumpbin /imports hello_odin.exe
+  dumpbin /imports hello_zig.exe
+
+[linux]
+ldd:
+  ldd hello_rust
+  ldd hello_nim
+  ldd hello_go
+  ldd hello_odin
+  ldd hello_zig
+
+[windows]
+rust:
+  rustc --target x86_64-pc-windows-msvc -C target-feature=+crt-static -C opt-level='z' -C strip=symbols --verbose hello_rust.rs
+[linux]
+rust:
+  rustc --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C opt-level='z' -C strip=symbols --verbose hello_rust.rs
+
+[windows]
+nim:
+  nim c --cc:vcc -d:release -d:strip --opt:size hello_nim.nim 
+[linux]
+nim:
+  nim c --gcc.exe:musl-gcc --gcc.linkerexe:musl-gcc --passL:'-static' -d:release -d:strip --opt:size hello_nim.nim
+
+[windows]
+go:
+  go build -ldflags "-s" -x hello_go.go 
+[linux]
+go:
+  CC=/bin/x86_64-linux-musl-gcc go build -ldflags '-s -linkmode external -extldflags "-static"' -x hello_go.go 
+
+[windows]
+odin:
+  odin build hello_odin.odin -o:minimal -file -show-timings -show-more-timings -show-system-calls -extra-linker-flags:"-s -static"
+[linux]
+odin:
+  odin build hello_odin.odin -o:minimal -file -show-timings -show-more-timings -show-system-calls -extra-linker-flags:"-s -static -I /usr/include/x86_64-linux-musl -L /usr/lib/x86_64-linux-musl --target=x86_64-linux-musl"
+
+[windows]
+zig:
+  zig build-exe -target x86_64-windows-msvc -O ReleaseSmall -static -fstrip -ftime-report --verbose-cc --verbose-link hello_zig.zig 
+[linux]
+zig:
+  zig build-exe -target x86_64-linux-musl -O ReleaseSmall -static -fstrip -ftime-report --verbose-cc --verbose-link hello_zig.zig 
