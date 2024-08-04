@@ -1,7 +1,14 @@
 
 # Hello
 
-Comparison of hello world binary file sizes in various languages
+Comparison of *hello world* **static-linking** binary file sizes in various languages
+
+
+| OS      | LIBC |
+|---------|------|
+| Windows | msvc |
+| Linux   | musl |
+
 
 ## Build
 
