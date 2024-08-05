@@ -4,10 +4,10 @@
 Comparison of *hello world* **static-linking** binary file sizes in various languages
 
 
-| OS      | LIBC | PIE      |
-|---------|------|----------|
-| Windows | msvc | unknown  |
-| Linux   | musl | disabled |
+| OS      | LIBC | PIE      | Build ID |
+|---------|------|----------|----------|
+| Windows | msvc | none     | none     | 
+| Linux   | musl | disabled | none     |
 
 
 ## Build
@@ -20,9 +20,9 @@ just build
 
 ```sh
 just ls
-```
 
+just file
 
-```sh
 just ldd
 ```
+

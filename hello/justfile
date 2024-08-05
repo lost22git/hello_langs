@@ -37,25 +37,24 @@ build:
   just rust
   just nim
   just go
-  just zig
   just odin
+  just zig
+  just c3
   just ls
 
 [windows]
-ldd:
-  dumpbin /imports hello_rust.exe
-  dumpbin /imports hello_nim.exe
-  dumpbin /imports hello_go.exe
-  dumpbin /imports hello_odin.exe
-  dumpbin /imports hello_zig.exe
+file:
+  ls *.exe | % { file $_.Name }
+[linux]
+file:
+  find . -type f ! -name "*.*" -name "hello*" | xargs -r file
 
+[windows]
+ldd:
+  ls *.exe | % { dumpbin /imports $_.Name }
 [linux]
 ldd:
-  ldd hello_rust
-  ldd hello_nim
-  ldd hello_go
-  ldd hello_odin
-  ldd hello_zig
+  find . -type f ! -name "*.*" -name "hello*" | xargs -r ldd
 
 [windows]
 rust:
@@ -63,7 +62,7 @@ rust:
 [linux]
 rust:
   # PIE: -C relocation-model=default or -C relocation-model=pie
-  rustc --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C relocation-model=static -C opt-level='z' -C strip=symbols --verbose hello_rust.rs
+  rustc --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C relocation-model=static -C opt-level='z' -C strip=symbols -C link-args='-Wl,--build-id=none' --verbose hello_rust.rs
 
 [windows]
 nim:
@@ -75,11 +74,11 @@ nim:
 
 [windows]
 go:
-  go build -ldflags "-s" -x hello_go.go 
+  go build -ldflags "-s -w -buildid=" -x hello_go.go 
 [linux]
 go:
   # -buildmode=pie
-  CC=/bin/x86_64-linux-musl-gcc go build -ldflags '-s -linkmode external -extldflags "-static"' -x hello_go.go 
+  CC=/bin/x86_64-linux-musl-gcc go build -ldflags '-s -w -buildid= -linkmode external -extldflags "-static"' -x hello_go.go 
 
 [windows]
 odin:
@@ -97,3 +96,11 @@ zig:
 zig:
   # -fPIE
   zig build-exe -target x86_64-linux-musl -O ReleaseSmall -static -fstrip -ftime-report --verbose-cc --verbose-link hello_zig.zig 
+
+[windows]
+c3:
+  # c3c --debug-stats --print-linking --wincrt=static -Oz compile hello_c3.c3
+[linux]
+c3:
+  # --reloc=PIE
+  c3c --debug-stats --print-linking --cc /usr/bin/x86_64-linux-musl-gcc -z '-s -static' --reloc=none -Oz compile hello_c3.c3
