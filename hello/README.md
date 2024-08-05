@@ -21,6 +21,8 @@ just build
 ```sh
 just ls
 
+just run
+
 just file
 
 just ldd

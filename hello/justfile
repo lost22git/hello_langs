@@ -43,6 +43,13 @@ build:
   just ls
 
 [windows]
+run:
+  ls *.exe | % { & ".\$($_.Name)" }
+[linux]
+run:
+  find . -type f ! -name "*.*" -name "hello*" | xargs -r -I{} sh -c "{}"
+
+[windows]
 file:
   ls *.exe | % { file $_.Name }
 [linux]
@@ -70,7 +77,8 @@ nim:
 [linux]
 nim:
   # --passL:'-static-pie'
-  nim c --gcc.exe:musl-gcc --gcc.linkerexe:musl-gcc --passL:'-static' -d:release -d:strip --opt:size hello_nim.nim
+  # nim c --gcc.exe:musl-gcc --gcc.linkerexe:musl-gcc --passL:'-Oz -s -static' -d:release --opt:size hello_nim.nim
+  nim c --cc:clang --clang.exe:zigcc --clang.linkerexe:zigcc --passC:'-Oz -s -static -target x86_64-linux-musl' --passL:'-Oz -s -static -target x86_64-linux-musl' -d:release --opt:size hello_nim.nim
 
 [windows]
 go:
@@ -78,7 +86,8 @@ go:
 [linux]
 go:
   # -buildmode=pie
-  CC=/bin/x86_64-linux-musl-gcc go build -ldflags '-s -w -buildid= -linkmode external -extldflags "-static"' -x hello_go.go 
+  # CC=/bin/x86_64-linux-musl-gcc go build -ldflags '-s -w -buildid= -linkmode external -extldflags "-static"' -x hello_go.go 
+  CC=zigcc go build -ldflags '-s -w -buildid= -linkmode external -extldflags "-Oz -s -static -target x86_64-linux-musl"' -x hello_go.go 
 
 [windows]
 odin:
@@ -87,7 +96,7 @@ odin:
 odin:
   # Odin not support PIE
   # https://github.com/odin-lang/Odin/issues/919#issuecomment-828480742 
-  odin build hello_odin.odin -o:minimal -file -show-timings -show-more-timings -show-system-calls -extra-linker-flags:"-s -static -I /usr/include/x86_64-linux-musl -L /usr/lib/x86_64-linux-musl --target=x86_64-linux-musl"
+  odin build hello_odin.odin -o:minimal -file -show-timings -show-more-timings -show-system-calls -extra-linker-flags:"-s -static -L /usr/lib/x86_64-linux-musl --target=x86_64-linux-musl"
 
 [windows]
 zig:
@@ -103,4 +112,4 @@ c3:
 [linux]
 c3:
   # --reloc=PIE
-  c3c --debug-stats --print-linking --cc /usr/bin/x86_64-linux-musl-gcc -z '-s -static' --reloc=none -Oz compile hello_c3.c3
+  c3c --debug-stats --print-linking --cc /usr/bin/x86_64-linux-musl-gcc -L /usr/lib/x86_64-linux-musl -z '-s -static' --reloc=none -Oz compile hello_c3.c3
