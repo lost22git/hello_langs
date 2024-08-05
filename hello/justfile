@@ -112,4 +112,5 @@ c3:
 [linux]
 c3:
   # --reloc=PIE
-  c3c --debug-stats --print-linking --cc /usr/bin/x86_64-linux-musl-gcc -L /usr/lib/x86_64-linux-musl -z '-s -static' --reloc=none -Oz compile hello_c3.c3
+  # c3c --debug-stats --print-linking --cc /usr/bin/x86_64-linux-musl-gcc -L /usr/lib/x86_64-linux-musl -z '-s -static' --reloc=none -Oz compile hello_c3.c3
+  c3c --debug-stats --print-linking --cc zigcc -z '-s -static -no-pie -target x86_64-linux-musl' --reloc=none -Oz compile hello_c3.c3
