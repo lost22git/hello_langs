@@ -7,7 +7,7 @@ Comparison of *hello world* **static-linking** binary file sizes in various lang
 | OS      | LIBC | PIE      | Build ID |
 |---------|------|----------|----------|
 | Windows | msvc | none     | none     | 
-| Linux   | musl | disabled | none     |
+| Linux   | musl | disabled | disabled |
 
 
 ## Build
