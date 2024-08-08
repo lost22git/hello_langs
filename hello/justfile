@@ -129,4 +129,4 @@ crystal:
 [linux]
 crystal:
   # crystal build --verbose --progress --time --stats --no-debug --release --static --target x86_64-linux-musl --link-flags '-s -Wl,--build-id=none' hello_crystal.cr
-  CC=zigcc crystal build --verbose --progress --time --stats --no-debug --release --static --cross-compile --target x86_64-linux-musl --link-flags '-s -Wl,--build-id=none -L{{justfile_directory()}}/libs' hello_crystal.cr
+  CC=zigcc crystal build --verbose --progress --time --stats --no-debug --release --static --cross-compile --target x86_64-linux-musl --link-flags '-s -Wl,--build-id=none -L{{justfile_directory()}}/libs -lunwind' hello_crystal.cr
