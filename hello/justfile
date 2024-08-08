@@ -1,33 +1,33 @@
 set windows-shell := [ "powershell", "-nologo", "-noprofile", "-c" ]
 
 _default:
- @just --list
+ @just --list --unsorted
 
-# Clean binary files
+# Clean executable files
 [windows]
 clean:
   rm *.exe.obj 
   rm *.exe
-# Clean binary files
+# Clean executable files
 [linux]
 clean:
   rm *.o -f
   find . -type f ! -name "*.*" -name "hello*" | xargs -r rm
 
-# List binary files
+# List executable files
 [windows]
 ls:
   ls *.exe | sort Length
-# List binary files
+# List executable files
 [linux]
 ls:
   ls -l | grep -E 'hello_\w+$' | sort --key=5n
 
-# List all binary files (Windows + Linux)
+# List all executable files (Windows + Linux)
 [windows]
 la:
   ls hello* | where { -not $_.Name.Contains(".") -or $_.Name.Endswith(".exe") } | sort Length
-# List all binary files (Windows + Linux)
+# List all executable files (Windows + Linux)
 [linux]
 la:
   ls -l | grep -E 'hello_\w+(\.exe)?$' | sort --key=5n
@@ -42,23 +42,29 @@ build:
   just c3
   just ls
 
+# Run executable files
 [windows]
 run:
   ls *.exe | % { & ".\$($_.Name)" }
+# Run executable files
 [linux]
 run:
   find . -type f ! -name "*.*" -name "hello*" | xargs -r -I{} sh -c "{}"
 
+# Detect executable files type
 [windows]
 file:
   ls *.exe | % { file $_.Name }
+# Detect executable files type
 [linux]
 file:
   find . -type f ! -name "*.*" -name "hello*" | xargs -r file
 
+# List dlls of executable files
 [windows]
 ldd:
   ls *.exe | % { dumpbin /imports $_.Name }
+# List dlls of executable files
 [linux]
 ldd:
   find . -type f ! -name "*.*" -name "hello*" | xargs -r ldd
@@ -69,7 +75,8 @@ rust:
 [linux]
 rust:
   # PIE: -C relocation-model=default or -C relocation-model=pie
-  rustc --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C relocation-model=static -C opt-level='z' -C strip=symbols -C link-args='-Wl,--build-id=none' --verbose hello_rust.rs
+  # rustc --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C relocation-model=static -C opt-level='z' -C strip=symbols -C link-args='-Wl,--build-id=none' --verbose hello_rust.rs
+  rustc -C linker=zigccrust --target x86_64-unknown-linux-musl -C target-feature=+crt-static -C opt-level='z' -C strip=symbols --verbose hello_rust.rs
 
 [windows]
 nim:
